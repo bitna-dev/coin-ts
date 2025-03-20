@@ -1,35 +1,34 @@
+import { getCoin, getPrice } from "@/api";
+import Loader from "@/components/Loader";
 import { InfoData, PriceData } from "@/types/general";
-import Loader from "@components/Loader";
-import { useEffect, useState } from "react";
-import { Route, Routes, useLocation, useParams } from "react-router-dom";
+import { useQuery } from "react-query";
+
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useMatch,
+  useParams,
+} from "react-router-dom";
 import styled from "styled-components";
-import Price from "./Price";
-import Chart from "./Chart";
 
 const Coin = () => {
   const location = useLocation();
   const { state } = location;
   const { coinId } = useParams();
-  const [info, setInfo] = useState<InfoData>();
-  const [priceInfo, setPriceInfo] = useState<PriceData>();
-  const [load, setLoad] = useState(true);
+  const priceMatch = useMatch("/:coinId/price");
+  const chartMatch = useMatch("/:coinId/chart");
 
-  const getInfo = async () => {
-    const infoRes = await (
-      await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-    ).json();
-    setInfo(infoRes);
-    const priceRes = await (
-      await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-    ).json();
-    setPriceInfo(priceRes);
-    setLoad(false);
-  };
-  useEffect(() => {
-    getInfo();
-  }, [coinId]);
-  console.log(info);
-  console.log(priceInfo);
+  const { isLoading: infoLoading, data: info } = useQuery<InfoData>(
+    ["info", coinId],
+    () => getCoin(coinId as string)
+  );
+  const { isLoading: priceLoading, data: priceInfo } = useQuery<PriceData>(
+    ["price", coinId],
+    () => getPrice(coinId as string)
+  );
+
+  if (infoLoading || priceLoading) return <Loader />;
   return (
     <Container>
       <Header>
@@ -67,10 +66,15 @@ const Coin = () => {
           </Item>
         </ContentItem>
       </Content>
-      <Routes>
-        <Route path={`${info?.id}/price`} element={<Price />} />
-        <Route path="/chart" element={<Chart />} />
-      </Routes>
+      <Tabs>
+        <Tab isActive={chartMatch !== null}>
+          <Link to="chart">Chart</Link>
+        </Tab>
+        <Tab isActive={priceMatch !== null}>
+          <Link to="price">Price</Link>
+        </Tab>
+      </Tabs>
+      <Outlet />
     </Container>
   );
 };
@@ -82,6 +86,9 @@ const Container = styled.div`
   padding: 0px 1.2rem;
   max-width: 480px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `;
 const Title = styled.h1`
   color: ${(props) => props.theme.accentColor};
@@ -102,7 +109,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 14px;
   color: ${(props) => props.theme.bgColor};
   padding: 0.5rem 1rem;
 `;
@@ -128,4 +135,27 @@ const ItemTitle = styled.span`
 const ItemDesc = styled.span`
   line-height: 1.3;
   font-size: 0.9rem;
+`;
+
+const Tabs = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  color: ${(props) => props.theme.bgColor};
+`;
+const Tab = styled.span<{ isActive: boolean }>`
+  width: 100%;
+  border-radius: 14px;
+  text-align: center;
+  background-color: ${(props) =>
+    props.isActive ? props.theme.accentColor : props.theme.color};
+  color: ${(props) =>
+    props.isActive ? props.theme.color : props.theme.bgColor};
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0.6rem 1rem;
+  }
 `;

@@ -1,35 +1,21 @@
-import { useEffect, useState } from "react";
+import { getCoins } from "@/api";
+import Loader from "@/components/Loader";
+import { ICoin } from "@/types/general";
+import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-interface CoinInter {
-  id: string;
-  is_active: boolean;
-  is_new: boolean;
-  name: string;
-  rank: number;
-  symbol: string;
-  type: string;
-}
-
 const Coins = () => {
-  const [coins, setCoins] = useState<CoinInter[]>([]);
-  const getCoins = async () => {
-    const res = await (
-      await fetch(`https://api.coinpaprika.com/v1/coins`)
-    ).json();
-    setCoins(res.slice(0, 100));
-  };
-  useEffect(() => {
-    getCoins();
-  }, []);
+  const { isLoading, data } = useQuery<ICoin[]>(["allCoins"], getCoins);
+
+  if (isLoading) return <Loader />;
   return (
     <Container>
       <Header>
         <Title>Coin</Title>
       </Header>
       <CoinsList>
-        {coins?.map((coin) => (
+        {data?.slice(0, 100).map((coin) => (
           <Coin key={coin.id}>
             <Link to={`/${coin.id}`} state={{ name: coin.name }}>
               <Img
