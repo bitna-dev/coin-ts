@@ -2,6 +2,7 @@ import { getCoin, getPrice } from "@/api";
 import Loader from "@/components/Loader";
 import { InfoData, PriceData } from "@/types/general";
 import { useQuery } from "react-query";
+import { Helmet } from "react-helmet";
 
 import {
   Link,
@@ -25,12 +26,18 @@ const Coin = () => {
   );
   const { isLoading: priceLoading, data: priceInfo } = useQuery<PriceData>(
     ["price", coinId],
-    () => getPrice(coinId as string)
+    () => getPrice(coinId as string),
+    {
+      refetchInterval: 5000,
+    }
   );
 
   if (infoLoading || priceLoading) return <Loader />;
   return (
     <Container>
+      <Helmet>
+        <title>{coinId}</title>
+      </Helmet>
       <Header>
         <Img src={`${info?.logo}`} />
         <Title>{state?.name ? state?.name : info?.name}</Title>
@@ -46,8 +53,8 @@ const Coin = () => {
             <ItemDesc>${info?.symbol}</ItemDesc>
           </Item>
           <Item>
-            <ItemTitle>SOURCE</ItemTitle>
-            <ItemDesc>{info?.open_source ? "Yes" : "No"}</ItemDesc>
+            <ItemTitle>Price</ItemTitle>
+            <ItemDesc>${priceInfo?.total_supply.toFixed(2)}</ItemDesc>
           </Item>
         </ContentItem>
         <ContentItem>
