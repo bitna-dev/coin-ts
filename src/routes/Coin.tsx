@@ -111,13 +111,13 @@ const Header = styled.header`
 `;
 
 const Content = styled.div`
-  background-color: ${(props) => props.theme.color};
+  background-color: ${(props) => props.theme.bgSecondColor};
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   border-radius: 14px;
-  color: ${(props) => props.theme.bgColor};
+  color: ${(props) => props.theme.color};
   padding: 0.5rem 1rem;
 `;
 
@@ -149,16 +149,15 @@ const Tabs = styled.div`
   justify-content: space-between;
   gap: 20px;
   align-items: center;
-  color: ${(props) => props.theme.bgColor};
+  color: ${(props) => props.theme.bgSecondColor};
 `;
 const Tab = styled.span<{ isActive: boolean }>`
   width: 100%;
   border-radius: 14px;
   text-align: center;
   background-color: ${(props) =>
-    props.isActive ? props.theme.accentColor : props.theme.color};
-  color: ${(props) =>
-    props.isActive ? props.theme.color : props.theme.bgColor};
+    props.isActive ? props.theme.accentColor : props.theme.bgSecondColor};
+  color: ${(props) => (props.isActive ? props.theme.color : props.theme.color)};
   a {
     display: block;
     width: 100%;

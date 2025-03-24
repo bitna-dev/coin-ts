@@ -5,10 +5,12 @@ import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import Chart from "react-apexcharts";
 import styled from "styled-components";
+import { useRecoilValue } from "recoil";
+import { isDarkAtom } from "@/atoms";
 
 const Charts = () => {
   const { coinId } = useParams();
-  console.log(coinId);
+  const isDark = useRecoilValue(isDarkAtom);
   const { isLoading, data } = useQuery<IChartData[]>(
     ["Chart", coinId],
     () => getCoinDetail(coinId as string),
@@ -26,7 +28,7 @@ const Charts = () => {
         type="line"
         options={{
           theme: {
-            mode: "dark",
+            mode: isDark ? "dark" : "light",
           },
           fill: {
             type: "gradient",
